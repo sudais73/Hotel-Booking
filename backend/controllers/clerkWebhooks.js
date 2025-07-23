@@ -3,7 +3,9 @@ import {Webhook} from 'svix'
 
 
 const clerkWebhooks = async(req,res)=>{
+   
     try {
+         console.log("Webhook Payload:", req.body); 
         // create a svix instance with clerk webhook secret//
         const wb = new Webhook(process.env.CLERK_WEBHOOK_SECRET);
         // getting headers//
@@ -13,7 +15,9 @@ const clerkWebhooks = async(req,res)=>{
             'svix-signature':req.headers['svix-signature'],
         }
         // verifying headers//
-        await wb.verify(JSON.stringify(req.body),headers)
+       
+        await wb.verify(JSON.stringify(req.body), headers);
+       console.log("Webhook verified successfully"); 
 
         // getting data from req.body//
         const {data,type} = req.body
@@ -24,23 +28,23 @@ const clerkWebhooks = async(req,res)=>{
             image:data.image_url,
         }
         // switch cases for different events//
-        switch (type) {
-            case 'user.created':{
-                await UserModel.create(userData)
-                break;
-            }
-            case 'user.updated':{
-                await UserModel.findByIdAndUpdate(data.id,userData)
-                break;
-            }
-               
-            case 'user.updated':{
-                await UserModel.findByIdAndDelete(data.id)
-                break;
-            }
-              default:
-                break;
-        }
+       switch (type) {
+    case 'user.created':{
+        await UserModel.create(userData)
+        break;
+    }
+    case 'user.updated':{
+        await UserModel.findByIdAndUpdate(data.id,userData)
+        break;
+    }
+       
+    case 'user.deleted':{ 
+        await UserModel.findByIdAndDelete(data.id)
+        break;
+    }
+      default:
+        break;
+}
         res.json({success:true, msg:" Webhook Received"})
 
     } catch (error) {
