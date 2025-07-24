@@ -1,12 +1,15 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react'
+import { Link} from 'react-router-dom';
 import { assets } from './../assets/assets';
-import { useClerk, UserButton, useUser } from '@clerk/clerk-react';
+import { useClerk, UserButton } from '@clerk/clerk-react';
+import { useState } from 'react';
+
+import { AppContext } from '../context/AppContext';
 
 
 const Navbar = () => {
     const {openSignIn} = useClerk();
-    const{user} = useUser();
+  
   const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Hotels', path: '/rooms' },
@@ -16,11 +19,13 @@ const Navbar = () => {
 
     
 
-    const [isScrolled, setIsScrolled] = React.useState(false);
-    const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-    const navigate = useNavigate()
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    React.useEffect(() => {
+
+    const{setShowHotelReg, user, navigate, isOwner} = useContext(AppContext)
+
+    useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 10);
         };
@@ -45,9 +50,9 @@ const Navbar = () => {
                             <div className={`${isScrolled ? "bg-gray-700" : "bg-white"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                         </a>
                     ))}
-                    { user&&<button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=>navigate('/owner')}>
-                        Dashboard
-                    </button>}
+                    { user && (<button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=> isOwner ? navigate('/owner'):setShowHotelReg(true)}>
+                       {isOwner ? "Dashboard":"List Your Hotel"}
+                    </button>)}
                 </div>
 
                 {/* Desktop Right */}
@@ -67,7 +72,7 @@ const Navbar = () => {
 
                 {/* Mobile Menu Button */}
                 <div className="flex items-center gap-3 md:hidden">
-                     {user&&<UserButton>
+                     {user && <UserButton>
                     <UserButton.MenuItems>
                         <UserButton.Action label='My Booking' labelIcon  onClick={()=>navigate('/my-booking')}/>
                     </UserButton.MenuItems>
@@ -88,9 +93,9 @@ const Navbar = () => {
                         </a>
                     ))}
 
-                    { user&&<button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=>navigate('/owner')}>
-                        Dashboard
-                    </button>}
+                    { user&&(<button className="border px-4 py-1 text-sm font-light rounded-full cursor-pointer transition-all" onClick={()=> isOwner ? navigate('/owner'):setShowHotelReg(true)}>
+                       {isOwner ? "Dashboard":"List Your Hotel"}
+                    </button>)}
 
                    {user ? <UserButton>
                     <UserButton.MenuItems>
